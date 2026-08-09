@@ -202,6 +202,24 @@ CREATE TABLE activity_logs (
         ON DELETE SET NULL
 );
 
+-- =========================================
+-- 12. CLASS SUBJECTS
+-- =========================================
+CREATE TABLE class_subjects (
+    class_id INT NOT NULL,
+    subject_id INT NOT NULL,
+
+    PRIMARY KEY (class_id, subject_id),
+
+    FOREIGN KEY (class_id)
+        REFERENCES classes(class_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (subject_id)
+        REFERENCES subjects(subject_id)
+        ON DELETE CASCADE
+);
+
 
 -- =========================================
 -- CHECK TABLES
