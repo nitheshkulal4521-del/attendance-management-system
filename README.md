@@ -52,5 +52,4 @@ Students can view their attendance, check subject-wise attendance, view absent d
 **Database Name:**
 -attendance_system
 
-```text
-attendance_system
+
