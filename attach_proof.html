@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Proof — AttendTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-dark:#1d4ed8; --blue-bg:#eff6ff;
+      --slate:#0f172a; --muted:#64748b; --border:#e2e8f0; --bg:#f8fafc;
+      --green:#16a34a; --green-bg:#f0fdf4;
+      --red:#dc2626;   --red-bg:#fef2f2;
+      --yellow:#d97706; --yellow-bg:#fffbeb;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--slate); }
+
+    .navbar {
+      background:var(--blue); padding:0 32px; height:60px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(37,99,235,0.3);
+    }
+    .nav-left  { display:flex; align-items:center; gap:16px; }
+    .nav-back  { color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; }
+    .nav-back:hover { color:white; }
+    .nav-brand { color:white; font-size:17px; font-weight:700; }
+    .nav-user  { color:rgba(255,255,255,0.85); font-size:14px; }
+
+    .container { max-width:700px; margin:0 auto; padding:32px 24px; }
+    .page-header { margin-bottom:28px; }
+    .page-header h1 { font-size:22px; font-weight:700; }
+    .page-header p  { color:var(--muted); font-size:14px; margin-top:4px; }
+
+    .card {
+      background:white; border-radius:16px; padding:32px;
+      box-shadow:0 1px 12px rgba(0,0,0,0.08); margin-bottom:28px;
+    }
+    .card-title {
+      font-size:17px; font-weight:700; margin-bottom:24px;
+      padding-bottom:14px; border-bottom:1px solid var(--border);
+    }
+
+    .form-group { margin-bottom:22px; }
+    .form-group label {
+      display:block; font-size:13px; font-weight:700;
+      color:var(--slate); margin-bottom:7px;
+    }
+    .form-group select,
+    .form-group textarea {
+      width:100%; padding:11px 14px;
+      border:1.5px solid var(--border); border-radius:10px;
+      font-size:14px; color:var(--slate);
+      font-family:'DM Sans',sans-serif; outline:none;
+      transition:border-color 0.2s, box-shadow 0.2s; background:white;
+    }
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+    }
+    .form-group textarea { min-height:90px; resize:vertical; }
+
+    .upload-zone {
+      border:2px dashed var(--border); border-radius:12px;
+      padding:36px 24px; text-align:center; cursor:pointer;
+      transition:all 0.2s; position:relative; background:var(--bg);
+    }
+    .upload-zone:hover,
+    .upload-zone.dragover { border-color:var(--blue); background:var(--blue-bg); }
+    .upload-zone input[type="file"] {
+      position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+    }
+    .upload-zone .upload-icon { font-size:40px; margin-bottom:12px; }
+    .upload-zone h3 { font-size:15px; font-weight:600; margin-bottom:6px; }
+    .upload-zone p  { font-size:13px; color:var(--muted); }
+    .file-types {
+      margin-top:10px; font-size:12px; color:var(--muted);
+      background:white; border:1px solid var(--border);
+      border-radius:6px; display:inline-block; padding:4px 12px;
+    }
+
+    .file-preview {
+      display:none; align-items:center; gap:12px;
+      background:var(--green-bg); border:1px solid #bbf7d0;
+      border-radius:10px; padding:12px 16px; margin-top:12px;
+    }
+    .file-preview.show { display:flex; }
+    .file-name { font-size:14px; font-weight:600; flex:1; }
+    .file-size { font-size:12px; color:var(--muted); }
+    .file-remove {
+      background:none; border:none; cursor:pointer;
+      font-size:18px; color:var(--muted); transition:color 0.2s;
+    }
+    .file-remove:hover { color:var(--red); }
+
+    .alert {
+      display:none; padding:12px 16px; border-radius:10px;
+      font-size:14px; margin-bottom:20px; font-weight:500;
+      align-items:center; gap:8px;
+    }
+    .alert.show { display:flex; }
+    .alert-error   { background:var(--red-bg);   color:var(--red);   border:1px solid #fecaca; }
+    .alert-success { background:var(--green-bg); color:var(--green); border:1px solid #bbf7d0; }
+
+    .btn-submit {
+      width:100%; padding:13px; background:var(--blue); color:white;
+      border:none; border-radius:10px; font-size:15px; font-weight:600;
+      font-family:'DM Sans',sans-serif; cursor:pointer;
+      transition:background 0.2s; display:flex; align-items:center;
+      justify-content:center; gap:8px;
+    }
+    .btn-submit:hover    { background:var(--blue-dark); }
+    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; }
+
+    .section-title { font-size:16px; font-weight:700; margin-bottom:16px; }
+    .submission-item {
+      background:white; border-radius:12px; padding:16px 20px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07); margin-bottom:12px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .sub-left { display:flex; align-items:center; gap:14px; }
+    .sub-icon { font-size:28px; }
+    .sub-subj { font-size:14px; font-weight:700; }
+    .sub-date { font-size:13px; color:var(--muted); margin-top:2px; }
+    .sub-note { font-size:13px; color:var(--muted); font-style:italic; margin-top:2px; }
+    .status-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;
+    }
+    .status-pending  { background:var(--yellow-bg); color:var(--yellow); }
+    .status-approved { background:var(--green-bg);  color:var(--green); }
+    .status-rejected { background:var(--red-bg);    color:var(--red); }
+
+    .empty-state { text-align:center; padding:32px; color:var(--muted); font-size:14px; }
+
+    @media(max-width:640px){
+      .container { padding:20px 14px; }
+      .card { padding:22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="student_dashboard.html" class="nav-back">← Dashboard</a>
+    <span class="nav-brand">📎 Submit Absence Proof</span>
+  </div>
+  <span class="nav-user" id="navUser"></span>
+</nav>
+
+<div class="container">
+
+  <div class="page-header">
+    <h1>Submit Absence Proof</h1>
+    <p>Upload supporting documents for classes you missed.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📄 Upload Document</div>
+
+    <div class="alert" id="alertBox">
+      <span id="alertIcon">⚠️</span>
+      <span id="alertMsg"></span>
+    </div>
+
+    <form id="proofForm">
+      <div class="form-group">
+        <label>Select Absent Record *</label>
+        <select id="attendanceId" required>
+          <option value="">— Select a class you were absent from —</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Proof Type *</label>
+        <select id="proofType" required>
+          <option value="">— Select document type —</option>
+          <option value="medical">🏥 Medical Certificate</option>
+          <option value="leave">📝 Leave Application</option>
+          <option value="emergency">🚨 Emergency / Family</option>
+          <option value="other">📁 Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Remarks / Note</label>
+        <textarea id="remarks" placeholder="Briefly describe why you were absent (optional)..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Upload File *</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="proofFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"/>
+          <div class="upload-icon">📂</div>
+          <h3>Click to browse or drag & drop</h3>
+          <p>Upload your supporting document here</p>
+          <span class="file-types">PDF · JPG · PNG · DOC · DOCX</span>
+        </div>
+        <div class="file-preview" id="filePreview">
+          <span style="font-size:24px">📄</span>
+          <div style="flex:1">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+          </div>
+          <button type="button" class="file-remove" onclick="removeFile()">✕</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">📤 Submit Proof</button>
+    </form>
+  </div>
+
+  <div class="section-title">Your Previous Submissions</div>
+  <div id="submissionsList"></div>
+
+</div>
+
+<script>
+  // ── Auth Guard ──
+  const studentRaw = sessionStorage.getItem('student');
+  if (!studentRaw) window.location.href = 'student_login.html';
+  const student = JSON.parse(studentRaw);
+  document.getElementById('navUser').textContent = student.name;
+
+  // ── Pre-select from URL ?id= if coming from View Attendance ──
+  const urlId = new URLSearchParams(window.location.search).get('id');
+
+  const editMode =
+    new URLSearchParams(window.location.search).get("edit") === "1";
+
+let currentProof = null;
+  // ── Load absent records into dropdown from real API ──
+  async function loadAbsentRecords() {
+    const sel = document.getElementById('attendanceId');
+    try {
+      const res  = await fetch(`api/get_attendance.php?student_id=${student.id}&status=Absent`);
+      const data = await res.json();
+
+      if (data.success && data.records.length > 0) {
+
+    data.records.forEach(r => {
+
+        console.log("Record:", r);
+
+        // Skip records that already have a proof,
+        // except the one being edited
+        if (r.proof_id && String(r.attendance_id) !== String(urlId)) {
+            return;
+        }
+
+        const opt = document.createElement('option');
+        opt.value = r.attendance_id;
+
+        const d = new Date(r.date);
+        const fmt = d.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+
+        opt.textContent = `${r.subject_name} — ${fmt}`;
+
+        if (urlId && String(r.attendance_id) === String(urlId))
+            opt.selected = true;
+
+        sel.appendChild(opt);
+
+    });
+
+    if (editMode && urlId) {
+        sel.value = urlId;
+    }
+
+
+      } else {
+        sel.innerHTML = '<option value="">No absent records found.</option>';
+        sel.disabled  = true;
+      }
+    } catch (e) {
+      sel.innerHTML = '<option value="">Failed to load records.</option>';
+      sel.disabled  = true;
+    }
+  }
+
+  // ── File selection ──
+  document.getElementById('proofFile').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('File must be under 5 MB.', 'error');
+      this.value = '';
+      return;
+    }
+    document.getElementById('fileName').textContent =  file.name;
+    document.getElementById('fileSize').textContent =
+      file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB'
+                               : (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    document.getElementById('filePreview').classList.add('show');
+    document.getElementById('uploadZone').style.display = 'none';
+  });
+
+  // ── Drag & drop ──
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', ()  => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    document.getElementById('proofFile').files = e.dataTransfer.files;
+    document.getElementById('proofFile').dispatchEvent(new Event('change'));
+  });
+
+  function removeFile() {
+    document.getElementById('proofFile').value = '';
+    document.getElementById('filePreview').classList.remove('show');
+    document.getElementById('uploadZone').style.display = 'block';
+  }
+
+  function showAlert(msg, type) {
+    const box = document.getElementById('alertBox');
+    box.className = `alert alert-${type} show`;
+    document.getElementById('alertMsg').textContent  = msg;
+    document.getElementById('alertIcon').textContent = type === 'success' ? '✅' : '⚠️';
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Form submit — real API call using FormData ──
+  document.getElementById('proofForm').addEventListener('submit', async function(e) {
+
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+
+    const attendanceId = document.getElementById('attendanceId').value;
+    const proofType = document.getElementById('proofType').value;
+    const remarks = document.getElementById('remarks').value;
+    const file = document.getElementById('proofFile').files[0];
+
+    if (!attendanceId) {
+        showAlert('Please select an absent record.', 'error');
+        return;
+    }
+
+    if (!proofType) {
+        showAlert('Please select a proof type.', 'error');
+        return;
+    }
+
+    // File required only while creating a new proof
+    if (!editMode && !file) {
+        showAlert('Please upload a document.', 'error');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = editMode ? 'Updating...' : 'Uploading...';
+
+    const formData = new FormData();
+
+    if (editMode) {
+
+        formData.append('proof_id', currentProof.proof_id);
+
+    } else {
+
+        formData.append('student_id', student.id);
+        formData.append('attendance_id', attendanceId);
+
+    }
+
+    formData.append('proof_type', proofType);
+    formData.append('remarks', remarks);
+
+    // Upload new file only if selected
+    if (file) {
+        formData.append('proof_file', file);
+    }
+
+    const api = editMode
+        ? 'api/update_proof.php'
+        : 'api/upload_proof.php';
+
+    try {
+
+        const res = await fetch(api, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            showAlert(
+                editMode
+                    ? '✅ Proof updated successfully.'
+                    : '✅ Proof submitted successfully! A teacher will review your submission.',
+                'success'
+            );
+
+            if (!editMode) {
+                this.reset();
+                removeFile();
+            }
+
+            loadPreviousSubmissions();
+
+            setTimeout(() => {
+                window.location.href = "view_attendance.html";
+            }, 1200);
+
+        } else {
+
+            showAlert(data.message || 'Operation failed.', 'error');
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+        showAlert('Server error. Please try again later.', 'error');
+
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = editMode ? '💾 Update Proof' : '📤 Submit Proof';
+
+});
+
+  // ── Load previous submissions from real API ──
+  async function loadPreviousSubmissions() {
+    const list  = document.getElementById('submissionsList');
+    const icons = { medical:'🏥', leave:'📝', emergency:'🚨', other:'📁' };
+
+    try {
+      const res  = await fetch(`api/get_proofs.php?student_id=${student.id}`);
+      const data = await res.json();
+
+      if (data.success && data.proofs.length > 0) {
+        list.innerHTML = data.proofs.map(p => {
+          const d      = new Date(p.submitted_at || p.date);
+          const fmt    = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+          const status = (p.status || 'pending').toLowerCase();
+          return `
+            <div class="submission-item">
+              <div class="sub-left">
+                <span class="sub-icon">${icons[p.proof_type] || '📄'}</span>
+                <div>
+                  <div class="sub-subj">${p.subject_name}</div>
+                  <div class="sub-date">Submitted on ${fmt}</div>
+                  ${p.remarks ? `<div class="sub-note">"${p.remarks}"</div>` : ''}
+                </div>
+              </div>
+              <span class="status-badge status-${status}">
+                ${status === 'approved' ? '✅ Approved' : status === 'rejected' ? '❌ Rejected' : '⏳ Pending'}
+              </span>
+            </div>`;
+        }).join('');
+      } else {
+        list.innerHTML = `<div class="empty-state">No submissions yet.</div>`;
+      }
+    } catch (e) {
+      list.innerHTML = `<div class="empty-state">Could not load submissions.</div>`;
+    }
+  }
+
+
+  async function loadExistingProof() {
+
+    if (!editMode || !urlId) return;
+
+    try {
+
+        const res = await fetch(
+            `api/get_single_proof.php?attendance_id=${urlId}`
+        );
+
+        const data = await res.json();
+
+        if (!data.success) return;
+
+        currentProof = data.proof;
+
+        document.getElementById("proofType").value =
+            currentProof.proof_type;
+
+        document.getElementById("remarks").value =
+            currentProof.remarks || "";
+
+        document.getElementById("submitBtn").innerHTML =
+            "💾 Update Proof";
+
+    }
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+  // ── Init ──
+  loadAbsentRecords();
+  loadExistingProof();
+  loadPreviousSubmissions();
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Attendance — AttendTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-dark:#1d4ed8; --blue-bg:#eff6ff;
+      --slate:#0f172a; --muted:#64748b; --border:#e2e8f0; --bg:#f8fafc;
+      --green:#16a34a; --green-bg:#f0fdf4;
+      --red:#dc2626;   --red-bg:#fef2f2;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--slate); }
+
+    .navbar {
+      background:var(--blue); padding:0 32px; height:60px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(37,99,235,0.3);
+    }
+    .nav-left  { display:flex; align-items:center; gap:16px; }
+    .nav-back  {
+      color:rgba(255,255,255,0.8); text-decoration:none;
+      font-size:13px; font-weight:600;
+    }
+    .nav-back:hover { color:white; }
+    .nav-brand { color:white; font-size:17px; font-weight:700; }
+    .nav-user  { color:rgba(255,255,255,0.85); font-size:14px; }
+
+    .container { max-width:1000px; margin:0 auto; padding:32px 24px; }
+    .page-header { margin-bottom:24px; }
+    .page-header h1 { font-size:22px; font-weight:700; }
+    .page-header p  { color:var(--muted); font-size:14px; margin-top:4px; }
+
+    .filters {
+      display:flex; gap:14px; flex-wrap:wrap;
+      background:white; border-radius:12px; padding:18px 20px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07); margin-bottom:24px;
+      align-items:flex-end;
+    }
+    .filter-group { display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px; }
+    .filter-group label {
+      font-size:12px; font-weight:700; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.4px;
+    }
+    .filter-group select,
+    .filter-group input[type="date"] {
+      padding:9px 12px; border:1.5px solid var(--border);
+      border-radius:8px; font-size:14px; color:var(--slate);
+      font-family:'DM Sans',sans-serif; outline:none;
+      transition:border-color 0.2s;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus { border-color:var(--blue); }
+    .btn-filter {
+      padding:9px 20px; background:var(--blue); color:white;
+      border:none; border-radius:8px; font-size:14px; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; align-self:flex-end;
+    }
+    .btn-filter:hover { background:var(--blue-dark); }
+    .btn-reset {
+      padding:9px 16px; background:white; color:var(--muted);
+      border:1.5px solid var(--border); border-radius:8px;
+      font-size:14px; font-weight:600; cursor:pointer;
+      font-family:'DM Sans',sans-serif; align-self:flex-end;
+      transition:all 0.2s;
+    }
+    .btn-reset:hover { border-color:var(--blue); color:var(--blue); }
+
+    .card { background:white; border-radius:14px; padding:24px; box-shadow:0 1px 8px rgba(0,0,0,0.07); }
+    .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .card-title  { font-size:16px; font-weight:700; }
+    .record-count{ font-size:13px; color:var(--muted); }
+
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    thead th {
+      background:var(--bg); padding:10px 14px; text-align:left;
+      font-size:12px; font-weight:700; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.5px;
+      border-bottom:1px solid var(--border);
+    }
+    tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--bg); }
+    tbody td { padding:12px 14px; }
+
+    .badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;
+    }
+    .badge-present { background:var(--green-bg); color:var(--green); }
+    .badge-absent  { background:var(--red-bg);   color:var(--red); }
+
+    .btn-proof {
+      padding:5px 12px; background:var(--blue-bg); color:var(--blue);
+      border:none; border-radius:6px; font-size:12px; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; text-decoration:none;
+      transition:all 0.2s;
+    }
+    .btn-proof:hover { background:var(--blue); color:white; }
+
+    .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty-state .icon { font-size:48px; margin-bottom:12px; }
+
+    .pagination {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      margin-top:20px; padding-top:20px; border-top:1px solid var(--border);
+    }
+    .page-btn {
+      width:36px; height:36px; border-radius:8px;
+      border:1.5px solid var(--border); background:white;
+      font-size:13px; font-weight:600; cursor:pointer;
+      font-family:'DM Sans',sans-serif; transition:all 0.2s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .page-btn:hover        { border-color:var(--blue); color:var(--blue); }
+    .page-btn.active       { background:var(--blue); color:white; border-color:var(--blue); }
+    .page-btn:disabled     { opacity:0.4; cursor:not-allowed; }
+
+    @media(max-width:640px){
+      .container { padding:20px 14px; }
+      .filters { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="student_dashboard.html" class="nav-back">← Dashboard</a>
+    <span class="nav-brand">📋 View Attendance</span>
+  </div>
+  <span class="nav-user" id="navUser"></span>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Attendance Records</h1>
+    <p>Your full attendance history across all subjects.</p>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Subject</label>
+      <select id="filterSubject"><option value="">All Subjects</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select id="filterStatus">
+        <option value="">All</option>
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>From Date</label>
+      <input type="date" id="filterFrom"/>
+    </div>
+    <div class="filter-group">
+      <label>To Date</label>
+      <input type="date" id="filterTo"/>
+    </div>
+    <button class="btn-filter" onclick="applyFilters()">Apply</button>
+    <button class="btn-reset"  onclick="resetFilters()">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Records</span>
+      <span class="record-count" id="recordCount"></span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Subject</th><th>Date</th><th>Day</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody id="attendanceBody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+  // ── Auth Guard ──
+  const studentRaw = sessionStorage.getItem('student');
+  if (!studentRaw) window.location.href = 'student_login.html';
+  const student = JSON.parse(studentRaw);
+  document.getElementById('navUser').textContent = student.name;
+
+  let allRecords = [];
+  let filtered   = [];
+  const PAGE_SIZE = 10;
+  let currentPage = 1;
+
+  // ── Fetch all attendance records from real API ──
+  async function loadAttendance() {
+    const tbody = document.getElementById('attendanceBody');
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Loading...</td></tr>`;
+
+    try {
+      const res  = await fetch(`api/get_attendance.php?student_id=${student.id}`);
+      const data = await res.json();
+
+      if (data.success && data.records.length > 0) {
+        allRecords = data.records;
+        filtered   = [...allRecords];
+        populateSubjectFilter();
+        renderTable();
+      } else {
+        allRecords = [];
+        filtered   = [];
+        renderTable();
+      }
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Failed to load records. Please try again.</td></tr>`;
+    }
+  }
+
+  // ── Populate subject dropdown from fetched data ──
+  function populateSubjectFilter() {
+    const sel      = document.getElementById('filterSubject');
+    const subjects = [...new Set(allRecords.map(r => r.subject_name))];
+    subjects.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('attendanceBody');
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filtered.slice(start, start + PAGE_SIZE);
+
+    document.getElementById('recordCount').textContent =
+      `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>No records match your filters.</p>
+          </div>
+        </td></tr>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+console.log("VIEW ATTENDANCE UPDATED");
+    tbody.innerHTML = page.map((r, i) => {
+      const d   = new Date(r.date);
+      const fmt = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+      const day = d.toLocaleDateString('en-IN', { weekday:'short' });
+      return `
+        <tr>
+          <td style="color:var(--muted);font-size:13px">${start + i + 1}</td>
+          <td style="font-weight:600">${r.subject_name}</td>
+          <td>${fmt}</td>
+          <td style="color:var(--muted)">${day}</td>
+          <td><span class="badge badge-${r.status.toLowerCase()}">${r.status === 'Present' ? '✅' : '❌'} ${r.status}</span></td>
+          <td>
+${(() => {
+
+    // Present → no action
+    if (r.status !== 'Absent') {
+        return `<span style="color:var(--muted);font-size:13px">—</span>`;
+    }
+
+    // No proof uploaded
+    if (!r.proof_id) {
+        return `<a href="attach_proof.html?id=${r.attendance_id}" class="btn-proof">📎 Submit Proof</a>`;
+    }
+
+    // Proof uploaded
+    switch (r.proof_status) {
+
+    case "Pending":
+        return `
+            <span style="color:#d97706;font-weight:600;">
+                ⏳ Pending
+            </span>
+        `;
+
+    case "Approved":
+        return `
+            <span style="color:#16a34a;font-weight:600;">
+                ✓ Approved
+            </span>
+        `;
+
+    case "Rejected":
+        return `
+            <span style="color:#dc2626;font-weight:600;">
+                ✕ Rejected
+            </span>
+        `;
+
+    default:
+        return `
+            <span style="color:var(--muted)">
+                Uploaded
+            </span>
+        `;
+}
+
+})()}
+</td>
+        </tr>`;
+    }).join('');
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+    const p = document.getElementById('pagination');
+    if (total <= 1) { p.innerHTML = ''; return; }
+    let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+    for (let i = 1; i <= total; i++) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+    p.innerHTML = html;
+  }
+
+  function goPage(n) {
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+    if (n < 1 || n > total) return;
+    currentPage = n;
+    renderTable();
+  }
+
+  function applyFilters() {
+    const subject = document.getElementById('filterSubject').value;
+    const status  = document.getElementById('filterStatus').value;
+    const from    = document.getElementById('filterFrom').value;
+    const to      = document.getElementById('filterTo').value;
+    filtered = allRecords.filter(r => {
+      if (subject && r.subject_name !== subject) return false;
+      if (status  && r.status       !== status)  return false;
+      if (from    && r.date < from)              return false;
+      if (to      && r.date > to)                return false;
+      return true;
+    });
+    currentPage = 1;
+    renderTable();
+  }
+
+  function resetFilters() {
+    ['filterSubject','filterStatus'].forEach(id => document.getElementById(id).value = '');
+    ['filterFrom','filterTo'].forEach(id => document.getElementById(id).value = '');
+    filtered = [...allRecords];
+    currentPage = 1;
+    renderTable();
+  }
+
+  // ── Init ──
+  loadAttendance();
+</script>
+</body>
+</html>

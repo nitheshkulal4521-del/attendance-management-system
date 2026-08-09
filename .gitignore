@@ -1,0 +1,16 @@
+# Database credentials
+config.php
+
+# Environment files
+.env
+.env.*
+
+# Uploaded proof files
+uploads/
+proof_uploads/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

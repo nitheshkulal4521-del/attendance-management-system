@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard — AttendTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-dark:#1d4ed8; --blue-bg:#eff6ff;
+      --slate:#0f172a; --muted:#64748b; --border:#e2e8f0; --bg:#f8fafc;
+      --green:#16a34a; --green-bg:#f0fdf4;
+      --red:#dc2626;   --red-bg:#fef2f2;
+      --yellow:#d97706; --yellow-bg:#fffbeb;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--slate); min-height:100vh; }
+
+    .navbar {
+      background:var(--blue); padding:0 32px; height:60px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(37,99,235,0.3);
+    }
+    .nav-brand { color:white; font-size:18px; font-weight:700; }
+    .nav-right  { display:flex; align-items:center; gap:16px; }
+
+.nav-user{
+
+    color:#2563eb;
+
+    font-size:16px;
+    font-weight:600;
+
+    white-space:nowrap;
+}
+.user-group{
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.btn-logout{
+
+    height:52px;
+
+    padding:0 22px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#ffffff;
+
+    color:#64748b;
+
+    border:1px solid #dbeafe;
+
+    border-radius:14px;
+
+    font-size:16px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.btn-logout:hover{
+
+    border-color:#2563eb;
+
+    color:#2563eb;
+}
+
+    .container { max-width:1080px; margin:0 auto; padding:32px 24px; }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      background:linear-gradient(130deg,#1e40af,#2563eb 60%,#3b82f6);
+      border-radius:16px; padding:28px 32px; color:white;
+      margin-bottom:28px; position:relative; overflow:hidden;
+    }
+    .welcome-banner::after {
+      content:'🎓'; position:absolute; right:28px; top:50%;
+      transform:translateY(-50%); font-size:72px; opacity:0.15;
+    }
+    .welcome-banner h2 { font-size:22px; font-weight:700; margin-bottom:6px; }
+    .welcome-banner p  { font-size:14px; opacity:0.85; }
+    .student-meta { display:flex; gap:12px; margin-top:14px; flex-wrap:wrap; }
+    .meta-chip {
+      background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2);
+      border-radius:20px; padding:4px 14px; font-size:13px;
+    }
+
+    /* Stat Cards */
+    .stat-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:18px; margin-bottom:28px;
+    }
+    .stat-card {
+      background:white; border-radius:14px; padding:22px 24px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07);
+      border-left:4px solid var(--blue);
+      display:flex; align-items:center; gap:18px;
+    }
+    .stat-card.green  { border-color:var(--green); }
+    .stat-card.red    { border-color:var(--red); }
+    .stat-card.yellow { border-color:var(--yellow); }
+    .stat-icon {
+      font-size:28px; width:52px; height:52px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--blue-bg); flex-shrink:0;
+    }
+    .stat-card.green  .stat-icon { background:var(--green-bg); }
+    .stat-card.red    .stat-icon { background:var(--red-bg); }
+    .stat-card.yellow .stat-icon { background:var(--yellow-bg); }
+    .stat-info .value { font-size:28px; font-weight:700; color:var(--slate); line-height:1; }
+    .stat-info .label { font-size:13px; color:var(--muted); margin-top:4px; }
+
+    /* Nav Cards */
+    .nav-cards {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:18px; margin-bottom:28px;
+    }
+    .nav-card {
+      background:white; border-radius:14px; padding:26px 24px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07);
+      text-decoration:none; color:var(--slate);
+      display:flex; flex-direction:column; gap:12px;
+      border:1.5px solid transparent;
+      transition:border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-card:hover {
+      border-color:var(--blue); transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(37,99,235,0.12);
+    }
+    .nav-card .card-icon {
+      font-size:28px; width:54px; height:54px; background:var(--blue-bg);
+      border-radius:12px; display:flex; align-items:center; justify-content:center;
+    }
+    .nav-card h3 { font-size:16px; font-weight:700; }
+    .nav-card p  { font-size:13px; color:var(--muted); line-height:1.5; }
+    .nav-card .arrow { font-size:18px; color:var(--blue); margin-top:4px; }
+
+    /* Recent Table */
+    .card { background:white; border-radius:14px; padding:24px; box-shadow:0 1px 8px rgba(0,0,0,0.07); }
+    .card-header {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
+    }
+    .card-title { font-size:16px; font-weight:700; }
+    .btn-view-all {
+      font-size:13px; color:var(--blue); font-weight:600;
+      text-decoration:none; background:none; border:none; cursor:pointer;
+      font-family:'DM Sans',sans-serif;
+    }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    thead th {
+      background:var(--bg); padding:10px 14px; text-align:left;
+      font-size:12px; font-weight:700; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.5px;
+      border-bottom:1px solid var(--border);
+    }
+    tbody tr { border-bottom:1px solid var(--border); }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--bg); }
+    tbody td { padding:11px 14px; }
+    .badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;
+    }
+    .badge-present { background:var(--green-bg); color:var(--green); }
+    .badge-absent  { background:var(--red-bg);   color:var(--red); }
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    position:relative;
+}
+.profile-btn{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    height:52px;
+
+    padding:0 18px;
+
+    background:#eff6ff;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.profile-btn:hover{
+
+    background:#dbeafe;
+}
+
+.profile-avatar{
+
+    width:38px;
+    height:38px;
+
+    border-radius:50%;
+
+    background:#2563eb;
+
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:16px;
+    font-weight:700;
+
+    flex-shrink:0;
+}
+.profile-popup{
+
+    position:absolute;
+
+    top:72px;
+    right:30px;
+
+    width:300px;
+
+    background:#fff;
+
+    border-radius:16px;
+
+    padding:22px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.18);
+
+    display:none;
+
+    z-index:999;
+}
+
+.profile-popup.show{
+    display:block;
+}
+
+.profile-item{
+
+    display:flex;
+    justify-content:space-between;
+
+    padding:12px 0;
+
+    border-bottom:1px solid #eee;
+
+    font-size:15px;
+}
+
+.change-password-btn{
+
+    width:100%;
+
+    margin-top:18px;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:600;
+}
+
+.password-modal{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:9999;
+}
+
+.password-modal.show{
+
+    display:flex;
+}
+
+.password-box{
+
+    width:420px;
+
+    background:#fff;
+
+    border-radius:16px;
+
+    padding:28px;
+
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+
+.password-box h2{
+
+    margin-bottom:20px;
+
+    font-size:22px;
+}
+
+.form-group{
+
+    margin-bottom:16px;
+}
+
+.form-group label{
+
+    display:block;
+
+    margin-bottom:6px;
+
+    font-weight:600;
+}
+
+.password-input{
+
+    width:100%;
+
+    padding:12px;
+
+    border:1px solid #dbeafe;
+
+    border-radius:10px;
+
+    outline:none;
+
+    font-size:15px;
+}
+
+.password-input:focus{
+
+    border-color:#2563eb;
+}
+
+.password-actions{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:20px;
+}
+
+.cancel-btn{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#e5e7eb;
+
+    cursor:pointer;
+}
+
+.update-btn{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#fff;
+
+    cursor:pointer;
+}
+#toast{
+
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    min-width:320px;
+    max-width:380px;
+
+    padding:15px 18px;
+
+    border-radius:12px;
+
+    color:#fff;
+
+    font-size:15px;
+    font-weight:600;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+
+    opacity:0;
+    visibility:hidden;
+
+    transform:translateX(100px);
+
+    transition:all .35s ease;
+
+    z-index:99999;
+}
+
+#toast.show{
+
+    opacity:1;
+    visibility:visible;
+
+    transform:translateX(0);
+}
+
+#toast.success{
+
+    background:#16a34a;
+}
+
+#toast.error{
+
+    background:#dc2626;
+}
+
+#toast.warning{
+
+    background:#d97706;
+}
+    @media(max-width:640px){
+      .container { padding:20px 14px; }
+      .welcome-banner { padding:22px 20px; }
+      .welcome-banner::after { display:none; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="nav-brand">
+        🎓 AttendTrack
+    </div>
+
+    <div class="user-group">
+
+        <div
+            class="profile-btn"
+            onclick="toggleProfile()"
+        >
+
+            <div
+                class="profile-avatar"
+                id="profileAvatar"
+            >
+                A
+            </div>
+
+            <span
+                class="nav-user"
+                id="navUserName"
+            >
+                Akshay
+            </span>
+
+        </div>
+
+        <button
+            class="btn-logout"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</nav>
+
+<div
+    class="profile-popup"
+    id="profilePopup"
+>
+
+    <h3>👤 Student Information</h3>
+
+    <div class="profile-item">
+        <strong>Name</strong>
+        <span id="popupName"></span>
+    </div>
+
+    <div class="profile-item">
+        <strong>USN</strong>
+        <span id="popupUSN"></span>
+    </div>
+
+    <div class="profile-item">
+        <strong>Department</strong>
+        <span id="popupDepartment"></span>
+    </div>
+
+    <div class="profile-item">
+        <strong>Semester</strong>
+        <span id="popupSemester"></span>
+    </div>
+
+    <button
+        class="change-password-btn"
+        onclick="openPasswordModal()"
+    >
+        🔑 Change Password
+    </button>
+
+</div>
+<div class="container">
+
+  <div class="welcome-banner">
+    <div>
+      <h2 id="welcomeName">Welcome!</h2>
+      <p  id="welcomeSub"></p>
+      <div class="student-meta" id="studentMeta"></div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-info">
+        <div class="value" id="totalClasses">0</div>
+        <div class="label">Total Classes</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <div class="value" id="attended">0</div>
+        <div class="label">Classes Attended</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">❌</div>
+      <div class="stat-info">
+        <div class="value" id="absent">0</div>
+        <div class="label">Classes Absent</div>
+      </div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-icon">📊</div>
+      <div class="stat-info">
+        <div class="value" id="percentage">0%</div>
+        <div class="label">Attendance %</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-cards">
+    <a class="nav-card" href="view_attendance.html">
+      <div class="card-icon">📋</div>
+      <div><h3>View Attendance</h3><p>See your full subject-wise attendance records.</p></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="nav-card" href="attendance_summary.html">
+      <div class="card-icon">📊</div>
+      <div><h3>Attendance Summary</h3><p>Check percentage and stats for each subject.</p></div>
+      <span class="arrow">→</span>
+    </a>
+    <a class="nav-card" href="attach_proof.html">
+      <div class="card-icon">📎</div>
+      <div><h3>Submit Proof</h3><p>Upload documents for absence justification.</p></div>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Attendance</span>
+      <a href="view_attendance.html" class="btn-view-all">View All →</a>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Subject</th><th>Date</th><th>Status</th></tr>
+      </thead>
+      <tbody id="recentBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+
+function toggleProfile(){
+
+    document
+        .getElementById("profilePopup")
+        .classList
+        .toggle("show");
+}
+
+window.addEventListener("click",function(e){
+
+    if(
+        !e.target.closest(".profile-btn") &&
+        !e.target.closest(".profile-popup")
+    ){
+
+        document
+        .getElementById("profilePopup")
+        .classList
+        .remove("show");
+    }
+
+});
+
+
+  // ── Auth Guard ──
+  const studentRaw = sessionStorage.getItem('student');
+  if (!studentRaw) window.location.href = 'student_login.html';
+  const student = JSON.parse(studentRaw);
+
+  document.getElementById("navUserName").textContent =
+    student.name;
+
+document.getElementById("profileAvatar").textContent =
+    student.name.charAt(0).toUpperCase();
+
+document.getElementById("popupName").textContent =
+    student.name;
+
+document.getElementById("popupUSN").textContent =
+    student.roll_no || student.roll || student.usn || "-";
+
+document.getElementById("popupDepartment").textContent =
+    student.department || "-";
+
+document.getElementById("popupSemester").textContent =
+    student.semester || "-";
+
+  // ── Populate student info (unchanged) ──
+  document.getElementById('navUserName').textContent = student.name;
+  document.getElementById('welcomeName').textContent = `Welcome back, ${student.name}! 👋`;
+  document.getElementById('welcomeSub').textContent =
+    `${student.usn} · ${student.department} · Semester ${student.semester}`;
+
+[
+    student.usn,
+    student.department,
+    `Sem ${student.semester}`
+].forEach(value => {
+
+    const chip =
+        document.createElement('span');
+
+    chip.className = 'meta-chip';
+
+    chip.textContent = value;
+
+    document.getElementById(
+        'studentMeta'
+    ).appendChild(chip);
+
+});
+
+  // ── Fetch attendance summary from real API ──
+  async function loadSummary() {
+    try {
+      const res  = await fetch(`api/get_attendance_summary.php?student_id=${student.id}`);
+      const data = await res.json();
+      if (data.success) {
+        const s = data.summary;
+        document.getElementById('totalClasses').textContent = s.total_classes;
+        document.getElementById('attended').textContent     = s.attended;
+        document.getElementById('absent').textContent       = s.absent;
+        document.getElementById('percentage').textContent   = s.percentage + '%';
+      }
+    } catch (e) {
+      console.error('Failed to load summary:', e);
+    }
+  }
+
+  // ── Fetch latest 5 attendance records from real API ──
+  async function loadRecentAttendance() {
+    try {
+      const res  = await fetch(`api/get_attendance.php?student_id=${student.id}&limit=5`);
+      const data = await res.json();
+      if (data.success && data.records.length > 0) {
+        document.getElementById('recentBody').innerHTML = data.records.map(r => {
+          const d   = new Date(r.date);
+          const fmt = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+          return `
+            <tr>
+              <td style="font-weight:600">${r.subject_name}</td>
+              <td>${fmt}</td>
+              <td><span class="badge badge-${r.status.toLowerCase()}">${r.status === 'Present' ? '✅' : '❌'} ${r.status}</span></td>
+            </tr>`;
+        }).join('');
+      } else {
+        document.getElementById('recentBody').innerHTML =
+          `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No attendance records found.</td></tr>`;
+      }
+    } catch (e) {
+      console.error('Failed to load recent attendance:', e);
+    }
+  }
+
+  
+function openPasswordModal(){
+
+    document
+        .getElementById("passwordModal")
+        .classList
+        .add("show");
+}
+
+function closePasswordModal(){
+
+    document
+        .getElementById("passwordModal")
+        .classList
+        .remove("show");
+}
+async function changePassword() {
+
+    const currentPassword = document.getElementById("currentPassword").value.trim();
+    const newPassword = document.getElementById("newPassword").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast("Please fill all fields.", "error");
+        return;
+    }
+    console.log({
+    user_id: student.user_id,
+    role: "student",
+    current_password: currentPassword,
+    new_password: newPassword,
+    confirm_password: confirmPassword
+});
+
+    try {
+
+        const response = await fetch("api/change_password.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: student.user_id,
+                role: "student",
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        });
+
+        const result = await response.json();
+         console.log(result);
+        if (result.success) {
+
+            closePasswordModal();
+
+            document
+                .getElementById("profilePopup")
+                .classList
+                .remove("show");
+
+            document.getElementById("currentPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
+
+            showToast(result.message, "success");
+
+        } else {
+
+            showToast(result.message, "error");
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+        showToast("Server error.", "error");
+
+    }
+
+}
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = 'student_login.html';
+  }
+
+function showToast(message,type="success"){
+
+    const toast = document.getElementById("toast");
+
+    toast.className = "";
+
+    toast.classList.add(type);
+    toast.classList.add("show");
+
+    let icon="";
+
+    if(type==="success") icon="✅";
+    else if(type==="error") icon="❌";
+    else icon="⚠️";
+
+    toast.innerHTML = `${icon} ${message}`;
+
+    setTimeout(()=>{
+
+        toast.classList.remove("show");
+
+    },3000);
+
+}
+
+  // ── Init ──
+  loadSummary();
+  loadRecentAttendance();
+</script>
+<!-- Change Password Modal -->
+
+<div class="password-modal" id="passwordModal">
+
+    <div class="password-box">
+
+        <h2>🔑 Change Password</h2>
+
+        <div class="form-group">
+            <label>Current Password</label>
+            <input
+                type="password"
+                id="currentPassword"
+                class="password-input"
+            >
+        </div>
+
+        <div class="form-group">
+            <label>New Password</label>
+            <input
+                type="password"
+                id="newPassword"
+                class="password-input"
+            >
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input
+                type="password"
+                id="confirmPassword"
+                class="password-input"
+            >
+        </div>
+
+        <div class="password-actions">
+
+            <button
+                class="cancel-btn"
+                onclick="closePasswordModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="update-btn"
+                onclick="changePassword()"
+            >
+                Update Password
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="toast"></div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Summary — AttendTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-dark:#1d4ed8; --blue-bg:#eff6ff;
+      --slate:#0f172a; --muted:#64748b; --border:#e2e8f0; --bg:#f8fafc;
+      --green:#16a34a; --green-bg:#f0fdf4;
+      --red:#dc2626;   --red-bg:#fef2f2;
+      --yellow:#d97706; --yellow-bg:#fffbeb;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--slate); }
+
+    .navbar {
+      background:var(--blue); padding:0 32px; height:60px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(37,99,235,0.3);
+    }
+    .nav-left  { display:flex; align-items:center; gap:16px; }
+    .nav-back  { color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; }
+    .nav-back:hover { color:white; }
+    .nav-brand { color:white; font-size:17px; font-weight:700; }
+    .nav-user  { color:rgba(255,255,255,0.85); font-size:14px; }
+
+    .container { max-width:1000px; margin:0 auto; padding:32px 24px; }
+    .page-header { margin-bottom:28px; }
+    .page-header h1 { font-size:22px; font-weight:700; }
+    .page-header p  { color:var(--muted); font-size:14px; margin-top:4px; }
+
+    /* Overall Stat Row */
+    .stat-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:16px; margin-bottom:28px;
+    }
+    .stat-card {
+      background:white; border-radius:14px; padding:20px 22px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07); border-top:4px solid var(--blue);
+    }
+    .stat-card.green  { border-color:var(--green); }
+    .stat-card.red    { border-color:var(--red); }
+    .stat-card.yellow { border-color:var(--yellow); }
+    .stat-card .val { font-size:30px; font-weight:700; color:var(--slate); margin-bottom:4px; }
+    .stat-card .lbl { font-size:13px; color:var(--muted); }
+
+    /* Overall Progress Card */
+    .overall-card {
+      background:white; border-radius:14px; padding:26px 28px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07); margin-bottom:28px;
+    }
+    .overall-header {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;
+    }
+    .overall-header h2 { font-size:16px; font-weight:700; }
+    .overall-pct { font-size:28px; font-weight:700; }
+    .pct-bar-bg { height:14px; background:var(--bg); border-radius:20px; overflow:hidden; margin-bottom:10px; }
+    .pct-bar {
+      height:100%; border-radius:20px;
+      background:linear-gradient(90deg,#2563eb,#3b82f6);
+      transition:width 1s ease;
+    }
+    .pct-bar.warn   { background:linear-gradient(90deg,#d97706,#f59e0b); }
+    .pct-bar.danger { background:linear-gradient(90deg,#dc2626,#ef4444); }
+    .pct-note { font-size:13px; color:var(--muted); }
+
+    /* Subject Grid */
+    .section-title { font-size:16px; font-weight:700; margin-bottom:16px; }
+    .subject-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px;
+    }
+    .subject-card {
+      background:white; border-radius:14px; padding:22px 24px;
+      box-shadow:0 1px 8px rgba(0,0,0,0.07);
+      border-left:4px solid var(--green);
+    }
+    .subject-card.warn   { border-color:var(--yellow); }
+    .subject-card.danger { border-color:var(--red); }
+
+    .subj-top {
+      display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px;
+    }
+    .subj-name { font-size:15px; font-weight:700; margin-bottom:3px; }
+    .subj-pct-badge {
+      font-size:18px; font-weight:700; padding:4px 12px;
+      border-radius:8px; white-space:nowrap;
+    }
+    .subj-pct-badge.good   { background:var(--green-bg); color:var(--green); }
+    .subj-pct-badge.warn   { background:var(--yellow-bg); color:var(--yellow); }
+    .subj-pct-badge.danger { background:var(--red-bg);    color:var(--red); }
+
+    .subj-bar-bg { height:8px; background:var(--bg); border-radius:20px; margin-bottom:14px; overflow:hidden; }
+    .subj-bar { height:100%; border-radius:20px; transition:width 1s ease; }
+    .subj-bar.good   { background:var(--green); }
+    .subj-bar.warn   { background:var(--yellow); }
+    .subj-bar.danger { background:var(--red); }
+
+    .subj-stats { display:flex; gap:16px; }
+    .subj-stat  { font-size:13px; color:var(--muted); }
+    .subj-stat strong { color:var(--slate); font-weight:700; }
+
+    .alert-box {
+      display:flex; align-items:center; gap:8px;
+      background:var(--red-bg); color:var(--red);
+      border:1px solid #fecaca; border-radius:8px;
+      padding:8px 12px; margin-top:12px; font-size:13px; font-weight:500;
+    }
+
+    @media(max-width:640px){
+      .container { padding:20px 14px; }
+      .subject-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="student_dashboard.html" class="nav-back">← Dashboard</a>
+    <span class="nav-brand">📊 Attendance Summary</span>
+  </div>
+  <span class="nav-user" id="navUser"></span>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Your Attendance Summary</h1>
+    <p>Subject-wise breakdown and overall statistics.</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="val" id="totalClasses">0</div>
+      <div class="lbl">Total Classes</div>
+    </div>
+    <div class="stat-card green">
+      <div class="val" id="totalAttended">0</div>
+      <div class="lbl">Classes Attended</div>
+    </div>
+    <div class="stat-card red">
+      <div class="val" id="totalAbsent">0</div>
+      <div class="lbl">Classes Absent</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="val" id="totalSubjects">0</div>
+      <div class="lbl">Subjects</div>
+    </div>
+  </div>
+
+  <div class="overall-card">
+    <div class="overall-header">
+      <div>
+        <h2>Overall Attendance</h2>
+        <p style="font-size:13px;color:var(--muted);margin-top:2px">Across all subjects</p>
+      </div>
+      <div class="overall-pct" id="overallPct">0%</div>
+    </div>
+    <div class="pct-bar-bg">
+      <div class="pct-bar" id="overallBar" style="width:0%"></div>
+    </div>
+    <p class="pct-note" id="pctNote"></p>
+  </div>
+
+  <div class="section-title">Subject-wise Breakdown</div>
+  <div class="subject-grid" id="subjectGrid"></div>
+</div>
+
+<script>
+  
+const studentRaw = sessionStorage.getItem('student');
+if (!studentRaw) window.location.href = 'student_login.html';
+
+const student = JSON.parse(studentRaw);
+document.getElementById('navUser').textContent = student.name;
+
+async function loadAttendance() {
+
+  const res = await fetch(`api/get_attendance.php?student_id=${student.id}`);
+  const data = await res.json();
+
+  if (!data.success) {
+    alert("Failed to load attendance");
+    return;
+  }
+
+  processAttendance(data.records);
+}
+
+function getLevel(pct) {
+  if (pct >= 75) return 'good';
+  if (pct >= 60) return 'warn';
+  return 'danger';
+}
+
+function processAttendance(records){
+
+  const total = records.length;
+  const attended = records.filter(r => r.status === 'Present').length;
+  const absent = total - attended;
+  const pct = total > 0 ? Math.round((attended / total) * 100) : 0;
+  const lvl = getLevel(pct);
+
+  const subjectMap = {};
+
+  records.forEach(r => {
+    if (!subjectMap[r.subject_name]) {
+      subjectMap[r.subject_name] = { total:0, present:0, absent:0 };
+    }
+
+    subjectMap[r.subject_name].total++;
+
+    if (r.status === 'Present')
+      subjectMap[r.subject_name].present++;
+    else
+      subjectMap[r.subject_name].absent++;
+  });
+
+  const subjects = Object.keys(subjectMap);
+
+  document.getElementById('totalClasses').textContent = total;
+  document.getElementById('totalAttended').textContent = attended;
+  document.getElementById('totalAbsent').textContent = absent;
+  document.getElementById('totalSubjects').textContent = subjects.length;
+
+  const pctEl = document.getElementById('overallPct');
+  pctEl.textContent = pct + '%';
+  pctEl.style.color = lvl === 'good'
+      ? 'var(--green)'
+      : lvl === 'warn'
+      ? 'var(--yellow)'
+      : 'var(--red)';
+
+  const bar = document.getElementById('overallBar');
+
+bar.classList.remove('warn', 'danger');
+
+if (lvl !== 'good') {
+    bar.classList.add(lvl);
+}
+
+bar.style.width = pct + '%';
+
+  const note = document.getElementById('pctNote');
+
+  if (lvl === 'good') {
+    note.textContent = '✅ Great! Your attendance is above 75%. Keep it up.';
+    note.style.color = 'var(--green)';
+  } else if (lvl === 'warn') {
+    note.textContent = '⚠️ Your attendance is between 60–75%. Try to attend more classes.';
+    note.style.color = 'var(--yellow)';
+  } else {
+    note.textContent = '🚨 Critical! Attendance below 60%. You may be at risk of shortage.';
+    note.style.color = 'var(--red)';
+  }
+
+  document.getElementById('subjectGrid').innerHTML = subjects.map(name => {
+
+    const s = subjectMap[name];
+    const spct = Math.round((s.present / s.total) * 100);
+    const slvl = getLevel(spct);
+
+    return `
+      <div class="subject-card ${slvl === 'good' ? '' : slvl}">
+        <div class="subj-top">
+          <div><div class="subj-name">${name}</div></div>
+          <div class="subj-pct-badge ${slvl}">${spct}%</div>
+        </div>
+
+        <div class="subj-bar-bg">
+          <div class="subj-bar ${slvl}" style="width:${spct}%"></div>
+        </div>
+
+        <div class="subj-stats">
+          <div class="subj-stat">Total: <strong>${s.total}</strong></div>
+          <div class="subj-stat">Present: <strong>${s.present}</strong></div>
+          <div class="subj-stat">Absent: <strong>${s.absent}</strong></div>
+        </div>
+
+        ${spct < 75 ? `<div class="alert-box">⚠️ Below 75% in this subject.</div>` : ''}
+      </div>
+    `;
+
+  }).join('');
+}
+
+loadAttendance();
+
+
+</script>
+</body>
+</html>

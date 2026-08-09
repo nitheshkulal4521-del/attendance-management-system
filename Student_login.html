@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Login — AttendTrack</title>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet"
+>
+
+<style>
+
+:root {
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --slate:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --white:#ffffff;
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body {
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    display:flex;
+    background:#f8fafc;
+}
+
+
+/* LEFT PANEL */
+
+.panel-left {
+    width:45%;
+    background:
+        linear-gradient(
+            145deg,
+            #1e40af 0%,
+            #2563eb 50%,
+            #3b82f6 100%
+        );
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    padding:60px 48px;
+
+    position:relative;
+    overflow:hidden;
+}
+
+.panel-left::before {
+    content:'';
+    position:absolute;
+
+    width:420px;
+    height:420px;
+
+    border-radius:50%;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    top:-120px;
+    right:-120px;
+}
+
+.panel-left::after {
+    content:'';
+    position:absolute;
+
+    width:280px;
+    height:280px;
+
+    border-radius:50%;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    bottom:-80px;
+    left:-80px;
+}
+
+
+.brand {
+    position:relative;
+    z-index:2;
+
+    text-align:center;
+    color:white;
+}
+
+.brand-icon {
+    width:72px;
+    height:72px;
+
+    background:
+        rgba(255,255,255,0.15);
+
+    border-radius:20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin:0 auto 24px;
+
+    font-size:32px;
+
+    border:
+        1px solid rgba(255,255,255,0.2);
+}
+
+.brand h1 {
+    font-family:
+        'Playfair Display',
+        serif;
+
+    font-size:28px;
+    margin-bottom:12px;
+}
+
+.brand p {
+    font-size:15px;
+    opacity:.8;
+
+    line-height:1.6;
+    max-width:280px;
+}
+
+.features {
+    margin-top:48px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:16px;
+
+    width:100%;
+    max-width:320px;
+}
+
+.feature-item {
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    background:
+        rgba(255,255,255,.1);
+
+    border-radius:12px;
+
+    padding:14px 18px;
+
+    color:white;
+    font-size:14px;
+
+    border:
+        1px solid rgba(255,255,255,.15);
+}
+
+
+/* RIGHT PANEL */
+
+.panel-right {
+    flex:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:40px 32px;
+}
+
+.login-box {
+    width:100%;
+    max-width:420px;
+}
+
+.login-box h2 {
+    font-size:28px;
+    font-weight:700;
+
+    color:var(--slate);
+
+    margin-bottom:6px;
+}
+
+.subtitle {
+    color:var(--muted);
+
+    font-size:15px;
+
+    margin-bottom:28px;
+}
+
+
+/* FORM */
+
+.form-group {
+    margin-bottom:18px;
+}
+
+.form-group label {
+    display:block;
+
+    font-size:13px;
+    font-weight:600;
+
+    color:var(--slate);
+
+    margin-bottom:7px;
+}
+
+.input-wrap {
+    position:relative;
+}
+
+.input-icon {
+    position:absolute;
+
+    left:14px;
+    top:50%;
+
+    transform:
+        translateY(-50%);
+
+    font-size:17px;
+
+    pointer-events:none;
+}
+
+.input-wrap input {
+    width:100%;
+
+    padding:
+        12px 42px 12px 42px;
+
+    border:
+        1.5px solid var(--border);
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    font-family:
+        'DM Sans',
+        sans-serif;
+
+    color:var(--slate);
+
+    background:white;
+
+    outline:none;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+}
+
+.input-wrap input:focus {
+    border-color:var(--blue);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37,99,235,.12);
+}
+
+.toggle-pw {
+    position:absolute;
+
+    right:14px;
+    top:50%;
+
+    transform:
+        translateY(-50%);
+
+    background:none;
+    border:none;
+
+    cursor:pointer;
+
+    font-size:17px;
+}
+
+
+/* ALERT */
+
+.alert {
+    display:none;
+
+    padding:11px 14px;
+
+    border-radius:9px;
+
+    font-size:13px;
+
+    margin-bottom:16px;
+
+    font-weight:500;
+}
+
+.alert.show {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.alert-error {
+    background:#fef2f2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+}
+
+.alert-success {
+    background:#f0fdf4;
+    color:#15803d;
+    border:1px solid #bbf7d0;
+}
+
+
+/* BUTTON */
+
+.btn-login {
+    width:100%;
+
+    padding:13px;
+
+    background:var(--blue);
+
+    color:white;
+
+    border:none;
+
+    border-radius:10px;
+
+    font-size:15px;
+    font-weight:600;
+
+    font-family:
+        'DM Sans',
+        sans-serif;
+
+    cursor:pointer;
+
+    margin-top:6px;
+}
+
+.btn-login:hover {
+    background:var(--blue-dark);
+}
+
+.btn-login:disabled {
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+
+/* SWITCH LOGIN / REGISTER */
+
+.account-switch {
+    text-align:center;
+
+    margin-top:20px;
+
+    font-size:13px;
+
+    color:var(--muted);
+}
+
+.account-switch button {
+    background:none;
+    border:none;
+
+    color:var(--blue);
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    font-family:
+        'DM Sans',
+        sans-serif;
+}
+
+.account-switch button:hover {
+    text-decoration:underline;
+}
+
+.form-footer {
+    text-align:center;
+
+    margin-top:24px;
+
+    font-size:12px;
+
+    color:var(--muted);
+}
+
+
+/* REGISTER FORM HIDDEN INITIALLY */
+
+#registerSection {
+    display:none;
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px) {
+
+    body {
+        flex-direction:column;
+    }
+
+    .panel-left {
+        width:100%;
+        padding:36px 24px;
+    }
+
+    .features {
+        display:none;
+    }
+
+    .panel-right {
+        padding:28px 20px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- LEFT PANEL -->
+
+<div class="panel-left">
+
+<div class="brand">
+
+    <div class="brand-icon">
+        🎓
+    </div>
+
+    <h1>
+        AttendTrack
+    </h1>
+
+    <p>
+        Your smart attendance management portal.
+        Track your records anytime, anywhere.
+    </p>
+
+
+    <div class="features">
+
+        <div class="feature-item">
+            <span>📋</span>
+            View your full attendance history
+        </div>
+
+        <div class="feature-item">
+            <span>📊</span>
+            Check your attendance percentage
+        </div>
+
+        <div class="feature-item">
+            <span>📎</span>
+            Submit absence proof documents
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- RIGHT PANEL -->
+
+<div class="panel-right">
+
+<div class="login-box">
+
+
+<!-- ALERT -->
+
+<div
+    class="alert"
+    id="alertBox"
+>
+
+    <span id="alertIcon">
+        ⚠️
+    </span>
+
+    <span id="alertMsg"></span>
+
+</div>
+
+
+
+<!-- =====================================================
+     LOGIN
+     ===================================================== -->
+
+<div id="loginSection">
+
+<h2>
+    Welcome back 👋
+</h2>
+
+<p class="subtitle">
+    Sign in to your student account to continue.
+</p>
+
+
+<form id="loginForm">
+
+
+<div class="form-group">
+
+<label>
+    USN / Roll Number
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    🎓
+</span>
+
+<input
+    type="text"
+    id="loginUsn"
+    placeholder="Example: 4SN23AL035"
+    autocomplete="username"
+    required
+>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>
+    Password
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    🔒
+</span>
+
+<input
+    type="password"
+    id="loginPassword"
+    placeholder="Enter your password"
+    autocomplete="current-password"
+    required
+>
+
+<button
+    type="button"
+    class="toggle-pw"
+    onclick="togglePassword('loginPassword')"
+>
+    👁️
+</button>
+
+</div>
+
+</div>
+
+
+
+<button
+    type="submit"
+    class="btn-login"
+    id="loginBtn"
+>
+    Sign In →
+</button>
+
+</form>
+
+
+
+<div class="account-switch">
+
+    Don't have an account?
+
+    <button
+        type="button"
+        onclick="showRegister()"
+    >
+        Create Account
+    </button>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     REGISTER
+     ===================================================== -->
+
+<div id="registerSection">
+
+<h2>
+    Create Account 🎓
+</h2>
+
+<p class="subtitle">
+    Register using the details provided to your college.
+</p>
+
+
+<form id="registerForm">
+
+
+<div class="form-group">
+
+<label>
+    Full Name
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    👤
+</span>
+
+<input
+    type="text"
+    id="registerName"
+    placeholder="Enter your full name"
+    autocomplete="name"
+    required
+>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>
+    USN / Roll Number
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    🎓
+</span>
+
+<input
+    type="text"
+    id="registerUsn"
+    placeholder="Example: 4SN23AL035"
+    autocomplete="username"
+    required
+>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>
+    Password
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    🔒
+</span>
+
+<input
+    type="password"
+    id="registerPassword"
+    placeholder="Minimum 6 characters"
+    autocomplete="new-password"
+    required
+>
+
+<button
+    type="button"
+    class="toggle-pw"
+    onclick="togglePassword('registerPassword')"
+>
+    👁️
+</button>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>
+    Confirm Password
+</label>
+
+<div class="input-wrap">
+
+<span class="input-icon">
+    🔒
+</span>
+
+<input
+    type="password"
+    id="confirmPassword"
+    placeholder="Re-enter your password"
+    autocomplete="new-password"
+    required
+>
+
+<button
+    type="button"
+    class="toggle-pw"
+    onclick="togglePassword('confirmPassword')"
+>
+    👁️
+</button>
+
+</div>
+
+</div>
+
+
+
+<button
+    type="submit"
+    class="btn-login"
+    id="registerBtn"
+>
+    Create Account
+</button>
+
+</form>
+
+
+
+<div class="account-switch">
+
+    Already have an account?
+
+    <button
+        type="button"
+        onclick="showLogin()"
+    >
+        Sign In
+    </button>
+
+</div>
+
+</div>
+
+
+
+<p class="form-footer">
+    Having trouble? Contact your department administrator.
+</p>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   SWITCH FORMS
+   ========================================================= */
+
+function showRegister() {
+
+    document.getElementById(
+        'loginSection'
+    ).style.display = 'none';
+
+    document.getElementById(
+        'registerSection'
+    ).style.display = 'block';
+
+    clearAlert();
+}
+
+
+function showLogin() {
+
+    document.getElementById(
+        'registerSection'
+    ).style.display = 'none';
+
+    document.getElementById(
+        'loginSection'
+    ).style.display = 'block';
+
+    clearAlert();
+}
+
+
+
+/* =========================================================
+   PASSWORD VISIBILITY
+   ========================================================= */
+
+function togglePassword(id) {
+
+    const input =
+        document.getElementById(id);
+
+    input.type =
+        input.type === 'password'
+            ? 'text'
+            : 'password';
+}
+
+
+
+/* =========================================================
+   ALERT
+   ========================================================= */
+
+function showAlert(
+    message,
+    type = 'error'
+) {
+
+    const box =
+        document.getElementById(
+            'alertBox'
+        );
+
+    document.getElementById(
+        'alertMsg'
+    ).textContent = message;
+
+    document.getElementById(
+        'alertIcon'
+    ).textContent =
+        type === 'success'
+            ? '✅'
+            : '⚠️';
+
+    box.className =
+        `alert alert-${type} show`;
+}
+
+
+function clearAlert() {
+
+    document.getElementById(
+        'alertBox'
+    ).className = 'alert';
+}
+
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+document.getElementById(
+    'loginForm'
+).addEventListener(
+    'submit',
+    async function(event) {
+
+        event.preventDefault();
+
+        clearAlert();
+
+
+        const usn =
+            document.getElementById(
+                'loginUsn'
+            ).value.trim().toUpperCase();
+
+
+        const password =
+            document.getElementById(
+                'loginPassword'
+            ).value;
+
+
+        const button =
+            document.getElementById(
+                'loginBtn'
+            );
+
+
+        button.disabled = true;
+        button.textContent =
+            'Signing In...';
+
+
+        try {
+
+            const response =
+                await fetch(
+                    'api/login.php',
+                    {
+                        method:'POST',
+
+                        headers:{
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify({
+                                usn,
+                                password
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                showAlert(
+                    data.message ||
+                    'Login failed.'
+                );
+
+                return;
+            }
+
+
+            sessionStorage.setItem(
+                'student',
+                JSON.stringify(
+                    data.user
+                )
+            );
+
+
+            sessionStorage.setItem(
+                'role',
+                'student'
+            );
+
+
+            showAlert(
+                'Login successful! Redirecting...',
+                'success'
+            );
+
+
+            setTimeout(
+                function() {
+
+                    window.location.href =
+                        'student_dashboard.html';
+
+                },
+                700
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                'Unable to connect to the server.'
+            );
+
+        } finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                'Sign In →';
+        }
+    }
+);
+
+
+
+/* =========================================================
+   REGISTER
+   ========================================================= */
+
+document.getElementById(
+    'registerForm'
+).addEventListener(
+    'submit',
+    async function(event) {
+
+        event.preventDefault();
+
+        clearAlert();
+
+
+        const name =
+            document.getElementById(
+                'registerName'
+            ).value.trim();
+
+
+        const usn =
+            document.getElementById(
+                'registerUsn'
+            ).value.trim().toUpperCase();
+
+
+        const password =
+            document.getElementById(
+                'registerPassword'
+            ).value;
+
+
+        const confirmPassword =
+            document.getElementById(
+                'confirmPassword'
+            ).value;
+
+
+        if (
+            password !==
+            confirmPassword
+        ) {
+
+            showAlert(
+                'Passwords do not match.'
+            );
+
+            return;
+        }
+
+
+        if (password.length < 6) {
+
+            showAlert(
+                'Password must contain at least 6 characters.'
+            );
+
+            return;
+        }
+
+
+        const button =
+            document.getElementById(
+                'registerBtn'
+            );
+
+
+        button.disabled = true;
+
+        button.textContent =
+            'Creating Account...';
+
+
+        try {
+
+            const response =
+                await fetch(
+                    'api/register.php',
+                    {
+                        method:'POST',
+
+                        headers:{
+                            'Content-Type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                name,
+
+                                usn,
+
+                                password,
+
+                                confirm_password:
+                                    confirmPassword
+
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                showAlert(
+                    data.message ||
+                    'Unable to create account.'
+                );
+
+                return;
+            }
+
+
+            /* Registration successful */
+
+            showLogin();
+
+
+            document.getElementById(
+                'loginUsn'
+            ).value = usn;
+
+
+            document.getElementById(
+                'loginPassword'
+            ).value = '';
+
+
+            document.getElementById(
+                'registerForm'
+            ).reset();
+
+
+            showAlert(
+                'Account created successfully. Sign in with your new password.',
+                'success'
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                'Unable to connect to the server.'
+            );
+
+        } finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                'Create Account';
+        }
+    }
+);
+
+
+</script>
+
+</body>
+</html>
